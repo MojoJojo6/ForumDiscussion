@@ -8,10 +8,11 @@ app.component('comment', {
         userLastName: '<',
         courseId: '<',
         roomName: '<',
-        comment: '='
+        comment: '=',
+        parentId: '<'
     },
     template:   `<div layout="column" ng-style="{'padding': '0px'}">
-                    <div layout-padding md-whiteframe="3" layout="column" ng-style="{'background': 'linear-gradient(to right, #F48FB1, #FCE4EC)' }">
+                    <div layout-padding md-whiteframe="3" layout="column" ng-style="{'background': 'linear-gradient(to right, #F48FB1, #FCE4EC)'}">
                         <label class="md-title">{{$ctrl.comment.user_first_name}} {{$ctrl.comment.user_last_name}}</label>
                         <label class="md-body-1">{{$ctrl.comment.comment}}</label>
                     </div>
@@ -21,9 +22,9 @@ app.component('comment', {
                             <input type="text" ng-model="$ctrl.new_comment" flex>
                         </md-input-container>
                         <md-button ng-click="$ctrl.onSend($ctrl.comment.id, 0)" class="md-raised md-primary" ng-style="{'height': '36px'}" ng-disabled="!$ctrl.new_comment">Send</md-button>
-                        <md-button ng-click="$ctrl.onSend($ctrl.comment.id, 1)" class="md-raised md-warn" ng-style="{'height': '36px'}">Delete</md-button>
+                        <md-button ng-click="$ctrl.onSend($ctrl.parentId, 1)" class="md-raised md-warn" ng-style="{'height': '36px'}">Delete</md-button>
                     </div>
-                    <comment-list ng-if="$ctrl.comment.children.length > 0" collection="$ctrl.comment.children" socket="$ctrl.socket" user-id="$ctrl.userId" user-first-name="$ctrl.userFirstName" user-last-name="$ctrl.userLastName" course-id="$ctrl.courseId" room-name="$ctrl.roomName"></comment-list>
+                    <comment-list ng-if="$ctrl.comment.children.length > 0" collection="$ctrl.comment.children" socket="$ctrl.socket" user-id="$ctrl.userId" user-first-name="$ctrl.userFirstName" user-last-name="$ctrl.userLastName" course-id="$ctrl.courseId" room-name="$ctrl.roomName" parent-id="$ctrl.comment.id"></comment-list>
                 </div>`,
     controller: function(){
         var self = this;
@@ -35,6 +36,7 @@ app.component('comment', {
                     {
                         event_type: event_type,
                         data: {
+                            id              : event_type ? this.comment.id : null, 
                             user_id         : self.userId,
                             user_first_name : self.userFirstName,
                             user_last_name  : self.userLastName,
@@ -58,10 +60,11 @@ app.component('commentList', {
         userLastName: '<',
         courseId: '<',
         roomName: '<',
-        collection: '='
+        collection: '=',
+        parentId: '<'
     },
     template:   `<div layout-padding layout="column">
-                    <comment ng-repeat="comment_obj in $ctrl.collection" comment="comment_obj" socket="$ctrl.socket" user-id="$ctrl.userId" user-first-name="$ctrl.userFirstName" user-last-name="$ctrl.userLastName" course-id="$ctrl.courseId" room-name="$ctrl.roomName"></comment> 
+                    <comment ng-repeat="comment_obj in $ctrl.collection" comment="comment_obj" socket="$ctrl.socket" user-id="$ctrl.userId" user-first-name="$ctrl.userFirstName" user-last-name="$ctrl.userLastName" course-id="$ctrl.courseId" room-name="$ctrl.roomName" parent-id="$ctrl.parentId" ng-style="{'margin-left': '40px', 'margin-right': '0px'}" ></comment> 
                 </div>`,
 });
 
@@ -105,5 +108,24 @@ app.controller('MainController', function($scope){
         console.log(data);
         self.comment_list = data;
         $scope.$apply();
+    }
+
+    self.onSend = function(){
+        self.socket.send(
+            JSON.stringify(
+                {
+                    event_type: 0,
+                    data: {
+                        id              : null, 
+                        user_id         : self.user_id,
+                        user_first_name : self.user_first_name,
+                        user_last_name  : self.user_last_name,
+                        course_id       : self.room_name,
+                        comment         : self.new_comment,
+                        parent_id       : null,
+                    } 
+                }
+            )
+        )
     }
 });

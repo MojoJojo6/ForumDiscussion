@@ -51,13 +51,9 @@ class ForumConsumer(AsyncWebsocketConsumer):
         """Runs when a new comment is received in a forum.
         """
         packet = json.loads(text_data)
-        print('Receive:', packet)
-        response = await self.deserialize_comment(packet['data'], packet['event_type']) # 0: Create / Update; 1: Delete
-        if response:
-            self.send(
-                text_data=json.dumps(response)
-            )
-            return
+        # print('Receive:', packet)
+        await self.deserialize_comment(packet['data'], packet['event_type']) # 0: Create / Update; 1: Delete
+        
         try:
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -100,23 +96,6 @@ class ForumConsumer(AsyncWebsocketConsumer):
             print('Error in serialize_forum: ', excep_obj)
             await self.close()
     
-    # async def serialize_comment(self, deserialized_data):
-    #     """Serializes a comment.
-        
-    #     Arguments:
-    #         deserialized_data {Object} -- Deserialized object from deserializer.
-        
-    #     Returns:
-    #         string -- serialized json tree.
-    #     """
-
-    #     try:
-    #         serializer_data = ForumSerializer(deserialized_data).data
-    #         return json.dumps(serializer_data)
-
-    #     except Exception as excep_obj:
-    #         print('Error in serialize_comment: ', excep_obj)
-    #         await self.close()
 
     async def deserialize_comment(self, serialized_data, event_type):
         """Deserializes a comment
@@ -134,14 +113,16 @@ class ForumConsumer(AsyncWebsocketConsumer):
         try:
             serializer = ForumSerializer(data=serialized_data)
             if serializer.is_valid(raise_exception=True):
-                instance = serializer.save()
                 if event_type == 1: # 0: Create/Update: Delete
-                    print('Deleting: ', type(instance), instance.id)
-                    await self.delete_instance(instance.id)
+                    # import ipdb
+                    # ipdb.set_trace()
+                    await self.delete_instance(serializer.validated_data['id'])
+                else:
+                    del serializer.validated_data['id']
+                    serializer.save()
 
         except ValidationError as except_obj:
             print('Validation Error in deserialize comment: ', except_obj)
-            return except_obj
         except Exception as except_obj:
             print('Error in deserialize_comment: ', except_obj)
             await self.close()
@@ -168,6 +149,8 @@ class ForumConsumer(AsyncWebsocketConsumer):
         Arguments:
             id {int} -- id of a forum model instance.
         """
+        # import ipdb
+        # ipdb.set_trace()
         Forum.objects.get(id=id).delete()
 
 

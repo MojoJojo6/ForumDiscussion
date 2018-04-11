@@ -41,7 +41,7 @@ class ForumListSerializer(serializers.ModelSerializer):
         """
         fields = super().get_fields()
         fields['children'] = ForumListSerializer(read_only=True, many=True)
-        return fields
+        return fields 
 
 
 class ForumSerializer(serializers.ModelSerializer):
@@ -50,13 +50,13 @@ class ForumSerializer(serializers.ModelSerializer):
     Arguments:
         ModelSerializer {class} -- Base class for serializer.
     """
-    id              = serializers.IntegerField(required=False)
+    id              = serializers.IntegerField(required=False, allow_null=True)
     user_id         = serializers.IntegerField()
     user_first_name = serializers.CharField(max_length=20)
     user_last_name  = serializers.CharField(max_length=20)
     course_id       = serializers.IntegerField()
     comment         = serializers.CharField(max_length=200, required=False)
-    parent_id       = serializers.PrimaryKeyRelatedField(queryset=Forum.objects.all())
+    parent_id       = serializers.PrimaryKeyRelatedField(queryset=Forum.objects.all(), allow_null=True)
     time_stamp      = serializers.DateTimeField(read_only=True)
     last_modified   = serializers.DateTimeField(read_only=True)
 
