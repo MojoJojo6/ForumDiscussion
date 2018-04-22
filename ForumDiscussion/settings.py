@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+# AUTH_USER_MODEL = 'ForumComments.User'
 # Application definition
 
 INSTALLED_APPS = [
@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'ForumDiscussion.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': 'CapstoneUserDB.sqlite3',
     }
 }
 
