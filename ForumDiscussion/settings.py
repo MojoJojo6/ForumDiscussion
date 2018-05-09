@@ -25,7 +25,7 @@ SECRET_KEY = '2n$vcxdrazvgvdx*!7&cq61#5=77shrw@m)!j!ns@c*52vr)ip'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.232.39.58', '127.0.0.1']
+ALLOWED_HOSTS = ['13.232.29.105', '127.0.0.1']
 
 # AUTH_USER_MODEL = 'ForumComments.User'
 # Application definition
